@@ -6,7 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -24,30 +23,17 @@
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsUserLocation="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5y3-d4-kdt">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                            </mapView>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="9ne-jQ-PmV">
-                                <rect key="frame" x="48" y="28" width="279" height="29"/>
-                                <segments>
-                                    <segment title="全部"/>
-                                    <segment title="7-11"/>
-                                    <segment title="全家"/>
-                                    <segment title="萊爾富"/>
-                                    <segment title="OK"/>
-                                </segments>
                                 <connections>
-                                    <action selector="selectShop:" destination="BYZ-38-t0r" eventType="valueChanged" id="nnO-Cl-jkA"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="RpO-sY-qiu"/>
                                 </connections>
-                            </segmentedControl>
+                            </mapView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstAttribute="trailingMargin" secondItem="9ne-jQ-PmV" secondAttribute="trailing" constant="32" id="DVZ-ox-LAx"/>
                             <constraint firstAttribute="trailing" secondItem="5y3-d4-kdt" secondAttribute="trailing" id="MZ1-W1-Jmz"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="5y3-d4-kdt" secondAttribute="bottom" id="SPe-JT-KTs"/>
                             <constraint firstItem="5y3-d4-kdt" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="T8o-Mh-OGh"/>
                             <constraint firstItem="5y3-d4-kdt" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="TiA-B1-hPI"/>
-                            <constraint firstItem="9ne-jQ-PmV" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="32" id="cmn-At-W3Y"/>
-                            <constraint firstItem="9ne-jQ-PmV" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="xD6-mp-qh1"/>
                         </constraints>
                     </view>
                     <connections>

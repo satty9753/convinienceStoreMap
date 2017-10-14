@@ -19,6 +19,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
     
     @IBOutlet weak var mapView: MKMapView!
     
+    // MARK: - check if network works
     func checkNetworkConnection(){
         if Reachability.isConnectedToNetwork(){
             print("Internet Connection Available!")
@@ -31,23 +32,6 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
 
     }
     
-    @IBAction func selectShop(_ sender: UISegmentedControl) {
-        switch sender.tag {
-        case 0:
-            print("show all locations")
-        case 1:
-            print("show 7-11")
-        case 2:
-            print("show 全家")
-        case 3:
-            print("show 萊爾富")
-        case 4:
-            print("show OK")
-        default:
-            print("show all locations")
-        }
-        
-    }
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -63,7 +47,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         
     }
 
-    //地址轉經緯度
+    /*
     func AddressToCoordinate(address:String, completion: @escaping(CLLocationCoordinate2D) ->()){
         let geocoder = CLGeocoder()
         var result:CLLocationCoordinate2D!
@@ -88,11 +72,11 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
             result = coordinate
             completion(result)
         }
-    }
+    }*/
     
-    
+    // MARK: - Get current location coordinate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        //guard判斷式成立之後才去做 currentLocation   拿到最新的位置
+        //get current location
         guard let currentLocation = locations.last else{
             return
         }
@@ -101,17 +85,17 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         geocoder.reverseGeocodeLocation(currentLocation) { (placemarks, error) in
             print(currentLocation)
         }
-        
-        //顯示出緯經度  coordinate 存放緯經度
         NSLog("Lat:\(coordinate.latitude),Lon:\(coordinate.longitude)")
-        //轉中文地址
+        
+        //download your-city-location-data
         DispatchQueue.once(token: "locateYourCity"){
-        getAddressFromCoordinate(pdblLatitude: String(coordinate.latitude), withLongitude: String(coordinate.longitude)) { (address) in
+           
+            getAddressFromCoordinate(pdblLatitude: String(coordinate.latitude), withLongitude: String(coordinate.longitude)) { (address) in
             self.address = address
-            
-            loadData(url: getURL(city: address), completion: { (shopList) in
+             loadData(url:getURL(city: address), completion: { (shopList) in
                 self.addShopAnnotation(list: shopList)
-            })
+             })
+            
           }
         }
         
@@ -123,19 +107,20 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
           }
         }
     
-    //coordinate to address
+    // MARK: - convert coordinate to address
     func getAddressFromCoordinate(pdblLatitude: String, withLongitude pdblLongitude: String, completion: @escaping (String) -> Void){
-        var center : CLLocationCoordinate2D = CLLocationCoordinate2D()
+        var center = CLLocationCoordinate2D()
         let lat = Double("\(pdblLatitude)")!
         let lon = Double("\(pdblLongitude)")!
         let ceo = CLGeocoder()
         center.latitude = lat
         center.longitude = lon
-        //change device language
+        
+        //change device language to show chinese name of city
         let defaults = UserDefaults.standard
         
         let lans = defaults.object(forKey: "AppleLanguages")
-        
+        //繁體中文
         defaults.set(["zh-CHT"], forKey: "AppleLanguages")
         
         let loc = CLLocation(latitude:center.latitude, longitude: center.longitude)
@@ -150,6 +135,7 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                 let pm = placemarks! as [CLPlacemark]
                 
                 if pm.count > 0 {
+                    //print city
                     let pm = placemarks![0]
                         if pm.subAdministrativeArea != nil{
                             address += pm.subAdministrativeArea!
@@ -157,30 +143,39 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
                     
                 }
                 completion(address)
+                
                 //restore device language
                 defaults.set(lans, forKey: "AppleLanguages")
         })
         
     }
     
+    // MARK: - add shop to annotation
     func addShopAnnotation(list:Array<Shop>){
         for shop in list{
             let annotation = MKPointAnnotation()
-            let address = shop.address
-            AddressToCoordinate(address: address!, completion: { (coordinate) in
-                annotation.coordinate = coordinate
-                annotation.title = shop.title
-                annotation.subtitle = shop.address
-                self.mapView.addAnnotation(annotation)
-            })
-            
+            if shop.coordinate != nil {
+                var shopCoordinate = shop.coordinate!
+                if let latNum = shopCoordinate["lat"] as? Double, let lngNum = shopCoordinate["lng"] as? Double {
+                    let coordinate = CLLocationCoordinate2D(latitude: latNum, longitude: lngNum)
+                    annotation.coordinate = coordinate
+                    annotation.title = shop.title
+                    annotation.subtitle = shop.address
+                }
+                 print(annotation.coordinate)
+                 self.mapView.addAnnotation(annotation)
+                
+            }
+            else{
+                print("Do nothing")
+            }
         }
         
     }
     
     
+    // MARK: - put annotation on map
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        print(annotation)
         if annotation is MKUserLocation {
             return nil
         }
@@ -188,16 +183,22 @@ class MapViewController: UIViewController, CLLocationManagerDelegate, MKMapViewD
         var result = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
         if result == nil{
             result = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-            print("something here!")
-        }else{
+        }
+        else{
             result?.annotation = annotation
-
         }
         result?.canShowCallout = true
-        let annotationView = UIImage(named:"pointRed")
-        result?.image = annotationView
+        let image = UIImage(named: "pointRed")
+        result?.image = image
+        
+        //Prepare LeftCalloutAccessoryView
+        let imageView = UIImageView(image: image)
+        result?.leftCalloutAccessoryView = imageView
+        
         return result
     }
+    
+
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

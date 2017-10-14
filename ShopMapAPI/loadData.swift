@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import CoreLocation
 
 let cities = [ "基隆市", "台北市", "新北市", "桃園市", "新竹市", "新竹縣",
          "苗栗縣", "台中市", "彰化縣", "雲林縣", "南投縣", "嘉義縣",
@@ -38,6 +39,9 @@ func loadData(url:String, completion: @escaping ([Shop]) -> Void) {
                     myShop.title = item["name"].string
                     myShop.address = item["address"].string
                     myShop.category = item["shop"].string
+                    let coordinateString = item["coordinate"].string
+                    let coordinateDict = convertToDictionary(text: coordinateString)
+                    myShop.coordinate = coordinateDict
                     results.append(myShop)
                 }
                 completion(results)
@@ -48,8 +52,6 @@ func loadData(url:String, completion: @escaping ([Shop]) -> Void) {
         }
     }
 }
-
-
 //轉中文網址
 extension String {
     
@@ -66,5 +68,26 @@ extension String {
     }
 }
 
+extension Double {
+    /// Rounds the double to decimal places value
+    func rounded(toPlaces places:Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return (self * divisor).rounded() / divisor
+    }
+}
     
+
+
+//covert string to dicitonary
+func convertToDictionary(text: String?) -> [String: Any]? {
+    if let data = text?.data(using: .utf8) {
+        do {
+            return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    return nil
+}
+
 

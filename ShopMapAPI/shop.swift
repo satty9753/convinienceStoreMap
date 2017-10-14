@@ -7,11 +7,13 @@
 //
 
 import Foundation
+import CoreLocation
 
 struct Shop{
-    var title: String!
-    var address: String!
-    var category: String!
+    var title: String?
+    var address: String?
+    var category: String?
+    var coordinate: Dictionary<String, Any>?
 
 }
 
